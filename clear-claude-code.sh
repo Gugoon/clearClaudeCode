@@ -83,7 +83,12 @@ PMS=()
 BREWS=()
 
 add() { for p in "$@"; do [[ -e "$p" || -L "$p" ]] && PATHS+=("$p"); done; }
-glob() { local m; for m in $(compgen -G "$1" 2>/dev/null); do PATHS+=("$m"); done; }
+glob() {
+    local m
+    while IFS= read -r m; do
+        [[ -n "$m" && (-e "$m" || -L "$m") ]] && PATHS+=("$m")
+    done < <(compgen -G "$1" 2>/dev/null)
+}
 
 # ── Level 1: 사용 흔적만 (~/.claude/ 안의 데이터 디렉토리만 골라서 삭제) ──
 if (( LEVEL == 1 )); then
