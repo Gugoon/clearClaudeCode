@@ -2,3 +2,7 @@
 .claude/
 claude-code-backup-*/
 *.bak
+*.png
+*.jpg
+*.jpeg
+스크린샷*
