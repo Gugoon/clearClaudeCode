@@ -222,32 +222,38 @@ sleep 1
 
 # ── 패키지 매니저로 제거 (Level 3 전용) ────────────────────────────────────
 RC=0
-for pm in "${PMS[@]:-}"; do
-    case "$pm" in
-        npm)  npm  uninstall -g "@anthropic-ai/claude-code" >/dev/null 2>&1 \
-              || sudo npm uninstall -g "@anthropic-ai/claude-code" >/dev/null 2>&1 ;;
-        yarn) yarn global remove "@anthropic-ai/claude-code" >/dev/null 2>&1 ;;
-        pnpm) pnpm remove -g "@anthropic-ai/claude-code" >/dev/null 2>&1 ;;
-        bun)  bun  remove -g "@anthropic-ai/claude-code" >/dev/null 2>&1 ;;
-    esac
-    if [[ $? -eq 0 ]]; then printf "%s✓%s %s 글로벌 패키지 제거\n" "$G" "$N" "$pm"
-    else printf "%s✗%s %s 제거 실패\n" "$R" "$N" "$pm"; RC=1; fi
-done
-for f in "${BREWS[@]:-}"; do
-    if brew uninstall --force "$f" >/dev/null 2>&1; then printf "%s✓%s brew 제거: %s\n" "$G" "$N" "$f"
-    else printf "%s✗%s brew 제거 실패: %s\n" "$R" "$N" "$f"; RC=1; fi
-done
+if (( ${#PMS[@]} > 0 )); then
+    for pm in "${PMS[@]}"; do
+        case "$pm" in
+            npm)  npm  uninstall -g "@anthropic-ai/claude-code" >/dev/null 2>&1 \
+                  || sudo npm uninstall -g "@anthropic-ai/claude-code" >/dev/null 2>&1 ;;
+            yarn) yarn global remove "@anthropic-ai/claude-code" >/dev/null 2>&1 ;;
+            pnpm) pnpm remove -g "@anthropic-ai/claude-code" >/dev/null 2>&1 ;;
+            bun)  bun  remove -g "@anthropic-ai/claude-code" >/dev/null 2>&1 ;;
+        esac
+        if [[ $? -eq 0 ]]; then printf "%s✓%s %s 글로벌 패키지 제거\n" "$G" "$N" "$pm"
+        else printf "%s✗%s %s 제거 실패\n" "$R" "$N" "$pm"; RC=1; fi
+    done
+fi
+if (( ${#BREWS[@]} > 0 )); then
+    for f in "${BREWS[@]}"; do
+        if brew uninstall --force "$f" >/dev/null 2>&1; then printf "%s✓%s brew 제거: %s\n" "$G" "$N" "$f"
+        else printf "%s✗%s brew 제거 실패: %s\n" "$R" "$N" "$f"; RC=1; fi
+    done
+fi
 
 # ── 파일 삭제 (시스템 경로는 sudo 자동 폴백) ───────────────────────────────
-for p in "${PATHS[@]:-}"; do
-    if rm -rf -- "$p" 2>/dev/null; then
-        printf "%s✓%s 삭제: %s\n" "$G" "$N" "$p"
-    elif sudo rm -rf -- "$p" 2>/dev/null; then
-        printf "%s✓%s 삭제(sudo): %s\n" "$G" "$N" "$p"
-    else
-        printf "%s✗%s 삭제 실패: %s\n" "$R" "$N" "$p"; RC=1
-    fi
-done
+if (( ${#PATHS[@]} > 0 )); then
+    for p in "${PATHS[@]}"; do
+        if rm -rf -- "$p" 2>/dev/null; then
+            printf "%s✓%s 삭제: %s\n" "$G" "$N" "$p"
+        elif sudo rm -rf -- "$p" 2>/dev/null; then
+            printf "%s✓%s 삭제(sudo): %s\n" "$G" "$N" "$p"
+        else
+            printf "%s✗%s 삭제 실패: %s\n" "$R" "$N" "$p"; RC=1
+        fi
+    done
+fi
 
 echo
 if (( RC == 0 )); then
